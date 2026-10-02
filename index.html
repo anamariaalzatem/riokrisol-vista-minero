@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="es">
+<head>
+<link rel="icon" href="data:,">
+<meta name="robots" content="noindex">
+<meta name="description" content="Boceto de la página de seguimiento para el titular minero. Datos de ejemplo.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vista del minero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:light}
+body{margin:0}
+/* Concepto: la planta del proyecto vista desde arriba. Cada componente es una estación con su gente trabajando; una banda
+   transportadora lleva el oro hasta la compuerta legal. Mismas fuentes y colores que la plataforma (tokens.css). */
+:root{
+  --bed:#F5F8FA; --panel:#FFFFFF; --panel-2:#EEF3F7; --line:#E2E8F0;
+  --ink:#33475B; --ink-soft:#516F90; --ink-dim:#6E8AA8;
+  --accent:#FF7A59; --accent-ink:#C9391E; --info:#2A78D6;
+  --ok:#0CA30C; --warn:#E5A100; --crit:#D03B3B;
+  --ok-bg:#E6F6E6; --warn-bg:#FFF4D6; --crit-bg:#FBE5E5;
+  --c-geo:#6C8AE4; --c-min:#8A7BD8; --c-met:#4FA8A0; --c-sst:#E4A93C; --c-amb:#5FB07A; --c-emp:#C98BC0; --c-jur:#D97B6C; --c-soc:#7FA3C4;
+  --ground:#E9EFF4; --wall:#FFFFFF; --belt:#9DB0C3; --belt-edge:#7E93A8; --gold:#F2B705; --skin:#E8B796; --hat:#FFC933; --leg:#4B5E73;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 2px 8px rgba(15,23,42,.06);
+  --disp:'Archivo',system-ui,sans-serif; --sans:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bed:#0F1923; --panel:#162431; --panel-2:#1C2E3E; --line:#27394A;
+    --ink:#E4ECF4; --ink-soft:#A9BCCE; --ink-dim:#8199B0;
+    --accent:#FF8A6C; --accent-ink:#FFA58D; --info:#6AA6F0;
+    --ok:#3CC63C; --warn:#F0B829; --crit:#F06A6A;
+    --ok-bg:#12331A; --warn-bg:#3A2E0E; --crit-bg:#3C1A1D;
+    --ground:#122230; --wall:#1E3142; --belt:#4C6176; --belt-edge:#3A4E62; --skin:#D9A889; --leg:#9FB2C5;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bed:#0F1923; --panel:#162431; --panel-2:#1C2E3E; --line:#27394A;
+  --ink:#E4ECF4; --ink-soft:#A9BCCE; --ink-dim:#8199B0;
+  --accent:#FF8A6C; --accent-ink:#FFA58D; --info:#6AA6F0;
+  --ok:#3CC63C; --warn:#F0B829; --crit:#F06A6A;
+  --ok-bg:#12331A; --warn-bg:#3A2E0E; --crit-bg:#3C1A1D;
+  --ground:#122230; --wall:#1E3142; --belt:#4C6176; --belt-edge:#3A4E62; --skin:#D9A889; --leg:#9FB2C5;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.3);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bed);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;padding-inline:16px;padding-block:0 40px}
+.wrap{max-width:720px;margin-inline:auto;display:flex;flex-direction:column;gap:20px;padding-block:16px}
+h1,h2,h3{font-family:var(--disp);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:19px;font-weight:700}
+h3{font-size:15px;font-weight:700}
+p{margin:0}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-dim)}
+.sub{color:var(--ink-soft);font-size:13px}
+
+.sketch{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--warn-bg);border:1px dashed var(--warn);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:12.5px}
+.sketch b{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.card > header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+
+/* Encabezado */
+.top{display:flex;flex-direction:column;gap:2px}
+.brand{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.02em;color:var(--ink-soft)}
+.top h1{font-size:26px;font-weight:800}
+.hero{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.ring{position:relative;width:104px;height:104px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .num{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-family:var(--disp);font-weight:800;font-size:28px;line-height:1}
+.ring .num small{display:block;font-family:var(--mono);font-weight:500;font-size:10.5px;color:var(--ink-dim);margin-top:2px}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.crit{background:var(--crit-bg);color:var(--crit)}
+.hero p.say{font-size:16px;margin-top:8px;font-weight:500}
+
+/* Planta */
+.plant{padding:0;overflow:hidden}
+.plant > header{padding:16px 16px 0;margin-bottom:8px}
+#plantSvg{display:block;width:100%;height:auto;background:var(--ground)}
+#plantSvg text{font-family:var(--sans)}
+.st{cursor:pointer;outline:none}
+.st .floor{fill:var(--panel);stroke:var(--line);stroke-width:1.2}
+.st:hover .floor{stroke:var(--ink-dim)}
+.st.sel .floor{stroke:var(--accent);stroke-width:2.6}
+.st:focus-visible .floor{stroke:var(--accent);stroke-width:2.6}
+.st .t-name{font-size:12.5px;font-weight:600;fill:var(--ink)}
+.st .t-pct{font-family:var(--mono);font-size:11px;fill:var(--ink-soft)}
+.st .wall{fill:var(--wall);stroke:var(--line);stroke-width:1}
+.st .track{fill:var(--panel-2)}
+.lamp{stroke:var(--panel);stroke-width:1.5}
+.lamp.ok{fill:var(--ok)} .lamp.warn{fill:var(--warn)} .lamp.crit{fill:var(--crit)}
+.halo{fill:none;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:halo 1.8s ease-out infinite}
+.halo.warn{stroke:var(--warn)} .halo.crit{stroke:var(--crit)}
+@keyframes halo{0%{transform:scale(.7);opacity:.9}100%{transform:scale(2.1);opacity:0}}
+.leg{fill:var(--leg)} .skin{fill:var(--skin)} .hat{fill:var(--hat)}
+.arm{fill:var(--skin);transform-box:fill-box;transform-origin:50% 0;animation:swing 1s ease-in-out infinite alternate}
+@keyframes swing{from{transform:rotate(-28deg)}to{transform:rotate(38deg)}}
+.smoke{fill:var(--ink-dim);opacity:0;animation:smoke 3.2s ease-out infinite}
+@keyframes smoke{0%{transform:translateY(0);opacity:.55}100%{transform:translateY(-22px);opacity:0}}
+.beltline{stroke:var(--belt-edge);stroke-width:2;stroke-dasharray:7 9;animation:belt 1.2s linear infinite}
+@keyframes belt{to{stroke-dashoffset:-16}}
+.gate-pole{fill:var(--crit)}
+.gate-text{font-size:11px;fill:var(--ink-soft);font-weight:500}
+.plant-foot{padding:10px 16px 14px;display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft)}
+.plant-foot span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* Detalle de estación */
+.detail{display:grid;gap:12px}
+.detail .row{display:flex;gap:14px;align-items:center}
+.mini-ring{width:64px;height:64px;position:relative;flex:none}
+.mini-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.mini-ring b{position:absolute;inset:0;display:grid;place-content:center;font-family:var(--disp);font-size:17px}
+.detail ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.detail li{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.detail li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink-dim);margin-top:8px;flex:none}
+.urgent-box{background:var(--crit-bg);border-radius:8px;padding:8px 12px;font-size:13.5px;color:var(--ink)}
+.urgent-box b{color:var(--crit)}
+
+/* Ruta */
+#routeSvg{display:block;width:100%;height:auto}
+#routeSvg text{font-family:var(--sans)}
+.r-title{font-size:11.5px;font-weight:600;fill:var(--ink)}
+.r-sub{font-size:10.5px;fill:var(--ink-soft)}
+.r-road{fill:none;stroke:var(--belt);stroke-width:15;stroke-linecap:round}
+.r-done{fill:none;stroke:var(--ok);stroke-width:15;stroke-linecap:round}
+.r-mid{fill:none;stroke:var(--panel);stroke-width:2;stroke-dasharray:6 8;opacity:.85}
+.pulse{transform-box:fill-box;transform-origin:center;animation:halo 1.8s ease-out infinite;fill:none;stroke:var(--accent);stroke-width:2.5}
+
+/* Producción */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat{background:var(--panel-2);border-radius:10px;padding:8px 10px;min-width:0}
+.stat b{display:block;font-family:var(--disp);font-size:20px;line-height:1.15}
+.stat span{font-size:11.5px;color:var(--ink-soft)}
+.chart text{font-family:var(--mono);font-size:10px;fill:var(--ink-soft)}
+.chart .tick{stroke:var(--line);stroke-width:1}
+.chart .target{stroke:var(--ink-dim);stroke-width:1.4;stroke-dasharray:4 4}
+.chart .val{fill:var(--ink);font-weight:600}
+.trend{font-size:12px;color:var(--ok);font-weight:600}
+
+/* Cascada */
+.fall{display:grid;gap:8px}
+.fall .r{display:grid;grid-template-columns:minmax(96px,34%) 1fr 46px;gap:10px;align-items:center;font-size:13px}
+.fall .r > span:first-child{min-width:0}
+.fall .trk{position:relative;height:16px;background:var(--panel-2);border-radius:5px}
+.fall .seg{position:absolute;top:0;bottom:0;border-radius:5px}
+.fall .v{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600}
+.fall .r.end{padding-top:8px;border-top:1px solid var(--line);font-weight:600}
+
+/* Presupuesto */
+.budget{display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:center}
+@media (max-width:440px){.budget{grid-template-columns:1fr;justify-items:center}}
+.legend{display:grid;gap:6px;font-size:13px;width:100%}
+.legend div{display:flex;align-items:center;gap:8px}
+.legend b{margin-left:auto;font-family:var(--mono);font-weight:600}
+.lock{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);background:var(--panel-2);border:1px dashed var(--line);border-radius:8px;padding:6px 10px;margin-top:12px}
+.bars{display:grid;gap:6px;margin-top:14px}
+.bars .b{display:grid;grid-template-columns:92px 1fr 38px;gap:8px;align-items:center;font-size:12.5px}
+.bars .b > span:first-child{min-width:0;overflow-wrap:anywhere}
+.bars .trk{height:9px;background:var(--panel-2);border-radius:5px;overflow:hidden}
+.bars .fill{height:100%;border-radius:5px}
+.bars .p{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* Listas */
+.list{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.item .who{width:30px;height:30px;border-radius:50%;display:grid;place-content:center;color:#fff;font-weight:600;font-size:11.5px}
+.item p{font-size:14px;font-weight:500}
+.item small{display:block;color:var(--ink-soft);font-size:12px;font-weight:400}
+.chip{border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap}
+.chip.crit{background:var(--crit-bg);color:var(--crit)} .chip.warn{background:var(--warn-bg);color:var(--warn)} .chip.ok{background:var(--ok-bg);color:var(--ok)} .chip.plain{background:var(--panel-2);color:var(--ink-soft)}
+.check{width:26px;height:26px;border-radius:50%;background:var(--ok-bg);display:grid;place-content:center;color:var(--ok)}
+.need{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.need .box{width:20px;height:20px;border-radius:6px;border:2px solid var(--ink-dim)}
+
+/* Plan */
+.stack{display:flex;height:22px;border-radius:7px;overflow:hidden;background:var(--panel-2)}
+.stack i{display:block;height:100%}
+.legend-inline{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-soft);margin-top:8px}
+.legend-inline span{display:inline-flex;gap:6px;align-items:center}
+.heat{display:grid;grid-template-columns:78px repeat(6,1fr);gap:3px;margin-top:16px;font-size:11.5px;align-items:center}
+.heat .h{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);text-align:center}
+.heat .rowl{color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.heat .cell{height:16px;border-radius:4px;background:var(--panel-2)}
+.heat .cell.now{outline:2px solid var(--accent);outline-offset:1px}
+.foot{font-size:12px;color:var(--ink-dim);text-align:center;padding-block:4px 12px}
+@media (prefers-reduced-motion: reduce){.arm,.smoke,.halo,.pulse,.beltline{animation:none}.smoke{opacity:.25}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="sketch"><b>Boceto</b> Datos de ejemplo inventados. Así vería el titular su proyecto desde el celular, con un enlace y sin usuario.</div>
+
+  <header class="top">
+    <span class="brand">RIOKRISOL · SEGUIMIENTO</span>
+    <h1>Mina La Esperanza</h1>
+    <span class="sub mono">Actualizado hoy 10:30 · Expediente de ejemplo</span>
+  </header>
+
+  <section class="card" aria-label="Estado general">
+    <div class="hero">
+      <div class="ring" aria-label="Índice de madurez 41 de 100">
+        <svg viewBox="0 0 104 104" aria-hidden="true">
+          <circle cx="52" cy="52" r="44" fill="none" style="stroke:var(--panel-2)" stroke-width="10"/>
+          <circle cx="52" cy="52" r="44" fill="none" style="stroke:var(--warn)" stroke-width="10" stroke-linecap="round" stroke-dasharray="113.3 276.5"/>
+        </svg>
+        <div class="num"><span>41<small>de 100</small></span></div>
+      </div>
+      <div>
+        <span class="pill warn">Atención</span>
+        <p class="say">Vamos avanzando, pero hay 2 temas legales que no pueden esperar esta semana.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card plant" aria-label="La planta">
+    <header>
+      <div><h2>Tu planta hoy</h2><p class="sub">Cada edificio es un frente del proyecto. Toca uno para ver qué pasa ahí.</p></div>
+    </header>
+    <svg id="plantSvg" viewBox="0 0 400 640" role="group" aria-label="Mapa de la planta con ocho frentes de trabajo"></svg>
+    <div class="plant-foot">
+      <span><i class="dot" style="background:var(--ok)"></i>Al día</span>
+      <span><i class="dot" style="background:var(--warn)"></i>Atención</span>
+      <span><i class="dot" style="background:var(--crit)"></i>Urgente</span>
+      <span>Las personas indican cuántas tareas hay en marcha.</span>
+    </div>
+  </section>
+
+  <section class="card detail" id="detail" aria-live="polite"></section>
+
+  <section class="card" aria-label="Ruta de formalización">
+    <header><div><h2>Ruta de la formalización</h2><p class="sub">Qué trámites ya pasaron, cuál está en curso y qué falta para operar legalmente.</p></div></header>
+    <svg id="routeSvg" viewBox="0 0 400 300" role="img" aria-label="Camino con seis etapas de formalización; la segunda está en curso"></svg>
+  </section>
+
+  <section class="card" aria-label="Producción de la semana">
+    <header><div><h2>Esta semana en planta</h2><p class="sub">Producción de oro y cuánto se recupera del mineral.</p></div><span class="trend mono">▲ 9 % vs. semana pasada</span></header>
+    <div class="grid2">
+      <div>
+        <h3>Oro producido por semana</h3>
+        <svg id="prodSvg" class="chart" viewBox="0 0 340 170" role="img" aria-label="Barras de producción de las últimas 8 semanas; la actual supera la meta de 200 gramos"></svg>
+      </div>
+      <div>
+        <h3>Recuperación</h3>
+        <svg id="recSvg" class="chart" viewBox="0 0 200 128" role="img" aria-label="Recuperación 84 por ciento, meta 88"></svg>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><b class="mono">186 g</b><span>oro esta semana</span></div>
+      <div class="stat"><b class="mono">312 t</b><span>mineral procesado</span></div>
+      <div class="stat"><b class="mono">2,1 g/t</b><span>ley de entrada</span></div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Qué le queda">
+    <header><div><h2>De cada $100 del oro</h2><p class="sub">Así se reparte el valor de lo que se vende.</p></div></header>
+    <div class="fall" id="fall"></div>
+    <div class="stat-row">
+      <div class="stat"><b class="mono">92 %</b><span>pagabilidad promedio</span></div>
+      <div class="stat"><b class="mono">30 %</b><span>margen del proyecto</span></div>
+      <div class="stat"><b class="mono">140 g</b><span>equilibrio por semana</span></div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Presupuesto">
+    <header><div><h2>Presupuesto</h2><p class="sub">Cuánto se ha gastado y cuánto está comprometido.</p></div></header>
+    <div class="budget">
+      <svg id="donut" viewBox="0 0 120 120" width="140" height="140" role="img" aria-label="46 por ciento ejecutado, 22 comprometido, 32 disponible"></svg>
+      <div class="legend">
+        <div><i class="dot" style="background:var(--info)"></i>Ejecutado<b>46 %</b></div>
+        <div><i class="dot" style="background:var(--accent)"></i>Comprometido<b>22 %</b></div>
+        <div><i class="dot" style="background:var(--belt)"></i>Disponible<b>32 %</b></div>
+      </div>
+    </div>
+    <div class="bars" id="budgetBars"></div>
+    <div class="lock"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Los montos en pesos se ven con un código que solo tiene el titular.</div>
+  </section>
+
+  <section class="card" aria-label="Lo urgente">
+    <header><h2>Lo más urgente</h2><span class="sub">5 tareas</span></header>
+    <ul class="list" id="urgent"></ul>
+  </section>
+
+  <section class="card" aria-label="Avances de la semana">
+    <header><h2>Lo que avanzó esta semana</h2></header>
+    <ul class="list" id="week"></ul>
+  </section>
+
+  <section class="card" aria-label="Lo que necesitamos de usted">
+    <header><div><h2>Lo que necesitamos de usted</h2><p class="sub">Con esto destraban el avance.</p></div></header>
+    <ul class="list" id="needs"></ul>
+  </section>
+
+  <section class="card" aria-label="Plan de trabajo">
+    <header><div><h2>Plan de trabajo</h2><p class="sub">Todas las tareas del proyecto de un vistazo.</p></div></header>
+    <div class="stack" role="img" aria-label="12 hechas, 8 en curso, 5 por iniciar, 2 atrasadas">
+      <i style="width:44.4%;background:var(--ok)"></i><i style="width:29.6%;background:var(--info)"></i><i style="width:18.5%;background:var(--belt)"></i><i style="width:7.5%;background:var(--crit)"></i>
+    </div>
+    <div class="legend-inline">
+      <span><i class="dot" style="background:var(--ok)"></i>12 hechas</span>
+      <span><i class="dot" style="background:var(--info)"></i>8 en curso</span>
+      <span><i class="dot" style="background:var(--belt)"></i>5 por iniciar</span>
+      <span><i class="dot" style="background:var(--crit)"></i>2 atrasadas</span>
+    </div>
+    <div class="heat" id="heat"></div>
+  </section>
+
+  <p class="foot">Riokrisol · Esta página se actualiza sola. Solo lectura.</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var NS = 'http://www.w3.org/2000/svg';
+  var STATUS = { ok: { label: 'Al día', cls: 'ok' }, warn: { label: 'Atención', cls: 'warn' }, crit: { label: 'Urgente', cls: 'crit' } };
+
+  /* ---------- Datos de ejemplo (inventados) ---------- */
+  var ST = [
+    { id: 'GEO', n: 'Geología', c: '--c-geo', pct: 62, s: 'ok', w: 2, icon: 'derrick', who: 'Ana Ríos, geóloga',
+      now: ['Actualizar el modelo de recursos', 'Muestreo del frente 3'], urgent: null },
+    { id: 'MIN', n: 'Minería', c: '--c-min', pct: 48, s: 'warn', w: 3, icon: 'mine', who: 'Luis Pardo, ingeniero de minas',
+      now: ['Plan de avance de la galería norte', 'Revisión de soporte de techos', 'Ventilación del nivel 2'], urgent: 'Entregar el plan de avance del mes' },
+    { id: 'MET', n: 'Metalurgia', c: '--c-met', pct: 55, s: 'ok', w: 2, icon: 'tank', who: 'Camila Soto, metalurgista',
+      now: ['Prueba de recuperación del circuito', 'Mantenimiento del molino'], urgent: null },
+    { id: 'SST', n: 'Seguridad y salud', c: '--c-sst', pct: 71, s: 'ok', w: 1, icon: 'cross', who: 'Jorge Mena, responsable SG-SST',
+      now: ['Capacitación de brigada de emergencia'], urgent: null },
+    { id: 'AMB', n: 'Ambiental', c: '--c-amb', pct: 41, s: 'warn', w: 2, icon: 'tree', who: 'Paula Vélez, ingeniera ambiental',
+      now: ['Trámite de la licencia ambiental', 'Monitoreo de agua del mes'], urgent: 'Radicar los anexos de la licencia' },
+    { id: 'SOC', n: 'Comunidad', c: '--c-soc', pct: 66, s: 'ok', w: 1, icon: 'houses', who: 'Marta Díaz, gestora social',
+      now: ['Reunión con la junta de acción comunal'], urgent: null },
+    { id: 'JUR', n: 'Jurídico', c: '--c-jur', pct: 28, s: 'crit', w: 3, icon: 'scales', who: 'Dra. Elena Mora, abogada',
+      now: ['Responder los autos de la ANM', 'Solicitar la prórroga del subcontrato', 'Revisar el contrato de formalización'], urgent: 'Responder el auto de la ANM vence hoy' },
+    { id: 'EMP', n: 'Empresarial', c: '--c-emp', pct: 52, s: 'warn', w: 1, icon: 'bars', who: 'Andrés Cruz, administrador',
+      now: ['Conciliar costos del trimestre'], urgent: null }
+  ];
+
+  function el(tag, attrs, html) {
+    var e = document.createElementNS(NS, tag);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (html) e.innerHTML = html;
+    return e;
+  }
+  function color(v) { return 'fill:var(' + v + ')'; }
+
+  /* ---------- Personas trabajando ---------- */
+  function person(px, py, v, delay) {
+    return '<g transform="translate(' + px + ',' + py + ')">' +
+      '<rect class="leg" x="-3.4" y="-8" width="2.8" height="8" rx="1.2"/><rect class="leg" x="0.6" y="-8" width="2.8" height="8" rx="1.2"/>' +
+      '<rect x="-5" y="-20" width="10" height="13" rx="3.5" style="' + color(v) + '"/>' +
+      '<circle class="skin" cx="0" cy="-24.5" r="4.2"/>' +
+      '<path class="hat" d="M-5 -25.2a5 5 0 0 1 10 0z"/><rect class="hat" x="-5.8" y="-25.4" width="11.6" height="1.6" rx=".8"/>' +
+      '<rect class="arm" x="3.6" y="-19" width="2.6" height="10" rx="1.3" style="animation-delay:' + delay + 's"/>' +
+      '</g>';
+  }
+
+  /* ---------- Edificios por frente ---------- */
+  function icon(type, v) {
+    var f = color(v), s = 'fill:none;stroke:var(' + v + ');stroke-width:2;stroke-linecap:round;stroke-linejoin:round';
+    switch (type) {
+      case 'derrick': return '<path d="M-9 14 L0 -12 L9 14 Z" style="' + s + '"/><path d="M-5 5 H5 M-3 -3 H3" style="' + s + '"/><path d="M0 -12 V-18" style="' + s + '"/>';
+      case 'mine': return '<path d="M-11 14 V3 a11 11 0 0 1 22 0 V14 Z" style="' + f + '"/><path d="M-6 14 V6 a6 6 0 0 1 12 0 V14" style="fill:var(--wall)"/>';
+      case 'tank': return '<rect x="-13" y="-3" width="17" height="17" rx="4" style="' + f + '"/><rect x="7" y="-14" width="5" height="28" rx="1" style="' + f + '"/>';
+      case 'cross': return '<rect x="-3.5" y="-10" width="7" height="22" rx="1.5" style="' + f + '"/><rect x="-11" y="-2.5" width="22" height="7" rx="1.5" style="' + f + '"/>';
+      case 'tree': return '<rect x="-1.8" y="4" width="3.6" height="10" style="fill:var(--leg)"/><circle cx="0" cy="-2" r="9" style="' + f + '"/><circle cx="-6" cy="5" r="5" style="' + f + '"/><circle cx="6" cy="5" r="5" style="' + f + '"/>';
+      case 'houses': return '<path d="M-14 14 V3 L-7 -4 L0 3 V14 Z" style="' + f + '"/><path d="M-1 14 V5 L6 -2 L13 5 V14 Z" style="' + f + ';opacity:.7"/>';
+      case 'scales': return '<path d="M0 -12 V14 M-10 14 H10 M-11 -6 H11" style="' + s + '"/><path d="M-11 -6 L-15 4 H-7 Z M11 -6 L7 4 H15 Z" style="' + f + '"/>';
+      default: return '<rect x="-12" y="2" width="6" height="12" rx="1.5" style="' + f + '"/><rect x="-3" y="-4" width="6" height="18" rx="1.5" style="' + f + '"/><rect x="6" y="-11" width="6" height="25" rx="1.5" style="' + f + '"/>';
+    }
+  }
+
+  var TW = 180, TH = 120, GAP = 142, TOP = 14;
+  function pos(i) { return { x: (i % 2) ? 212 : 8, y: TOP + Math.floor(i / 2) * GAP }; }
+
+  function tile(st, i) {
+    var p = pos(i), x = p.x, y = p.y, v = st.c, bw = TW - 24;
+    var g = el('g', { 'class': 'st', tabindex: '0', role: 'button', 'data-id': st.id,
+      'aria-label': st.n + ', ' + st.pct + ' por ciento, ' + STATUS[st.s].label });
+    var h = '<rect class="floor" x="' + x + '" y="' + y + '" width="' + TW + '" height="' + TH + '" rx="12"/>' +
+      '<text class="t-name" x="' + (x + 12) + '" y="' + (y + 20) + '">' + st.n + '</text>';
+    // edificio
+    h += '<g><rect class="wall" x="' + (x + 12) + '" y="' + (y + 44) + '" width="66" height="40" rx="3"/>' +
+      '<path d="M' + (x + 8) + ' ' + (y + 45) + ' L' + (x + 45) + ' ' + (y + 28) + ' L' + (x + 82) + ' ' + (y + 45) + ' Z" style="' + color(v) + '"/>' +
+      '<g transform="translate(' + (x + 45) + ',' + (y + 64) + ')">' + icon(st.icon, v) + '</g></g>';
+    if (st.icon === 'tank') {
+      h += '<circle class="smoke" cx="' + (x + 59) + '" cy="' + (y + 44) + '" r="4"/><circle class="smoke" style="animation-delay:1.5s" cx="' + (x + 61) + '" cy="' + (y + 44) + '" r="3.2"/>';
+    }
+    // personas
+    for (var k = 0; k < st.w; k++) { h += person(x + 100 + k * 24, y + 84, v, (k * 0.31).toFixed(2)); }
+    // lámpara de estado
+    h += '<circle class="lamp ' + st.s + '" cx="' + (x + TW - 16) + '" cy="' + (y + 16) + '" r="6"/>';
+    if (st.s !== 'ok') h += '<circle class="halo ' + st.s + '" cx="' + (x + TW - 16) + '" cy="' + (y + 16) + '" r="6"/>';
+    // avance
+    h += '<text class="t-pct" x="' + (x + TW - 12) + '" y="' + (y + TH - 24) + '" text-anchor="end">' + st.pct + ' %</text>' +
+      '<rect class="track" x="' + (x + 12) + '" y="' + (y + TH - 18) + '" width="' + bw + '" height="8" rx="4"/>' +
+      '<rect x="' + (x + 12) + '" y="' + (y + TH - 18) + '" width="' + (bw * st.pct / 100).toFixed(1) + '" height="8" rx="4" style="' + color(v) + '"/>';
+    g.innerHTML = h;
+    return g;
+  }
+
+  function buildPlant() {
+    var svg = $('#plantSvg');
+    var bottom = TOP + 3 * GAP + TH;           // 560
+    // banda transportadora central
+    svg.appendChild(el('rect', { x: 188, y: 0, width: 24, height: bottom + 38, style: 'fill:var(--belt)' }));
+    svg.appendChild(el('line', { 'class': 'beltline', x1: 200, y1: 0, x2: 200, y2: bottom + 38 }));
+    // alimentadores
+    ST.forEach(function (st, i) {
+      var p = pos(i), cy = p.y + 64;
+      var x1 = (i % 2) ? 188 : 188, x2 = (i % 2) ? p.x : p.x + TW;
+      svg.appendChild(el('line', { x1: x1, y1: cy, x2: x2, y2: cy, style: 'stroke:var(--belt);stroke-width:6;stroke-linecap:round' }));
+    });
+    ST.forEach(function (st, i) { svg.appendChild(tile(st, i)); });
+    // pepitas de oro que viajan por la banda
+    for (var n = 0; n < 4; n++) {
+      var d = el('circle', { r: 5, cx: 200, cy: 0, style: 'fill:var(--gold);stroke:var(--belt-edge);stroke-width:1' });
+      d.innerHTML = '<animateMotion dur="9s" begin="' + (n * 2.25) + 's" repeatCount="indefinite" path="M0 0 V' + (bottom + 30) + '"/>';
+      svg.appendChild(d);
+    }
+    // compuerta legal
+    var gy = bottom + 40;
+    svg.appendChild(el('g', {},
+      '<rect x="150" y="' + gy + '" width="100" height="34" rx="8" style="fill:var(--panel);stroke:var(--line);stroke-width:1.2"/>' +
+      '<rect x="228" y="' + (gy + 6) + '" width="14" height="22" rx="2" style="fill:var(--leg)"/>' +
+      '<rect class="gate-pole" x="160" y="' + (gy + 14) + '" width="66" height="6" rx="3"/>' +
+      '<path d="M170 ' + (gy + 14) + ' l6 6 M184 ' + (gy + 14) + ' l6 6 M198 ' + (gy + 14) + ' l6 6 M212 ' + (gy + 14) + ' l6 6" style="stroke:var(--panel);stroke-width:2.2"/>' +
+      '<text class="gate-text" x="200" y="' + (gy + 52) + '" text-anchor="middle">Compuerta legal: cerrada. Faltan 2 de 5 permisos.</text>'));
+    // selección
+    svg.querySelectorAll('.st').forEach(function (g) {
+      function go() { select(g.getAttribute('data-id')); }
+      g.addEventListener('click', go);
+      g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    });
+  }
+
+  function select(id) {
+    var st = ST.filter(function (s) { return s.id === id; })[0]; if (!st) return;
+    document.querySelectorAll('.st').forEach(function (g) { g.classList.toggle('sel', g.getAttribute('data-id') === id); });
+    var r = 26, C = 2 * Math.PI * r, stat = STATUS[st.s];
+    $('#detail').innerHTML =
+      '<div class="row"><div class="mini-ring"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="' + r + '" fill="none" style="stroke:var(--panel-2)" stroke-width="7"/>' +
+      '<circle cx="32" cy="32" r="' + r + '" fill="none" style="stroke:var(' + st.c + ')" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + (C * st.pct / 100).toFixed(1) + ' ' + C.toFixed(1) + '"/></svg><b>' + st.pct + '</b></div>' +
+      '<div><h2>' + st.n + '</h2><span class="pill ' + stat.cls + '">' + stat.label + '</span></div></div>' +
+      '<div><p class="eyebrow">Trabajando ahora en</p><ul>' + st.now.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul></div>' +
+      (st.urgent ? '<div class="urgent-box"><b>Urgente:</b> ' + st.urgent + '</div>' : '') +
+      '<p class="sub">A cargo: ' + st.who + '</p>';
+  }
+
+  /* ---------- Ruta de la formalización ---------- */
+  function buildRoute() {
+    var svg = $('#routeSvg');
+    var d = 'M52 52 H336 C386 52 386 112 336 112 H64 C14 112 14 172 64 172 H336 C386 172 386 232 336 232 H64';
+    var road = el('path', { 'class': 'r-road', d: d }); svg.appendChild(road);
+    var L = road.getTotalLength();
+    var steps = [
+      { t: 'RUCOM', s: 'Inscrito', st: 'done', f: 0.04 },
+      { t: 'Contrato de formalización', s: 'En riesgo por autos', st: 'now', f: 0.33 },
+      { t: 'Programa de trabajo (PTO)', s: 'Por iniciar', st: 'next', f: 0.44 },
+      { t: 'Licencia ambiental', s: 'En trámite', st: 'next', f: 0.60 },
+      { t: 'Autos de la ANM al día', s: '3 de 10 pendientes', st: 'next', f: 0.70 },
+      { t: 'Operación legal', s: 'Meta', st: 'goal', f: 0.99 }
+    ];
+    var cur = steps[1];
+    svg.appendChild(el('path', { 'class': 'r-done', d: d, 'stroke-dasharray': (L * cur.f).toFixed(1) + ' ' + L.toFixed(1) }));
+    svg.appendChild(el('path', { 'class': 'r-mid', d: d }));
+    steps.forEach(function (s, i) {
+      var p = road.getPointAtLength(Math.min(L - 1, L * s.f));
+      var x = Math.max(70, Math.min(330, p.x)), above = true;
+      var fill = s.st === 'done' ? 'var(--ok)' : s.st === 'now' ? 'var(--accent)' : s.st === 'goal' ? 'var(--ink)' : 'var(--panel)';
+      var stroke = s.st === 'next' ? 'var(--belt-edge)' : fill;
+      var g = el('g', {});
+      if (s.st === 'now') g.appendChild(el('circle', { 'class': 'pulse', cx: p.x, cy: p.y, r: 13 }));
+      g.appendChild(el('circle', { cx: p.x, cy: p.y, r: s.st === 'now' ? 12 : 10, style: 'fill:' + fill + ';stroke:' + stroke + ';stroke-width:2.5' }));
+      var glyph = s.st === 'done' ? '✓' : s.st === 'goal' ? '⚑' : String(i + 1);
+      var tc = s.st === 'next' ? 'var(--ink-soft)' : '#fff';
+      g.appendChild(el('text', { x: p.x, y: p.y + 4, 'text-anchor': 'middle', style: 'font-size:11px;font-weight:700;fill:' + tc }, glyph));
+      g.appendChild(el('text', { 'class': 'r-title', x: x, y: p.y - 30, 'text-anchor': 'middle' }, s.t));
+      g.appendChild(el('text', { 'class': 'r-sub', x: x, y: p.y - 17, 'text-anchor': 'middle' }, s.s));
+      svg.appendChild(g);
+    });
+    // camión en el tramo en curso
+    var tp = road.getPointAtLength(L * (cur.f - 0.05));
+    svg.appendChild(el('g', { transform: 'translate(' + (tp.x - 12) + ',' + (tp.y - 24) + ')' },
+      '<rect x="0" y="4" width="16" height="10" rx="2" style="fill:var(--accent)"/><path d="M16 7 h6 l3 4 v3 h-9z" style="fill:var(--accent-ink)"/>' +
+      '<circle cx="6" cy="16" r="2.6" style="fill:var(--ink)"/><circle cx="20" cy="16" r="2.6" style="fill:var(--ink)"/>'));
+    svg.appendChild(el('text', { x: 200, y: 280, 'text-anchor': 'middle', style: 'font-size:11px;fill:var(--ink-soft)' }, 'Usted está aquí: el camión va por el contrato de formalización.'));
+  }
+
+  /* ---------- Producción y recuperación ---------- */
+  function buildProd() {
+    var vals = [150, 162, 140, 171, 158, 176, 170, 186], max = 220, W = 340, H = 170, pl = 6, pb = 24, ptop = 22;
+    var bw = 28, step = (W - pl * 2) / vals.length;
+    var h = '', y = function (v) { return H - pb - (H - pb - ptop) * v / max; };
+    [0, 100, 200].forEach(function (t) { h += '<line class="tick" x1="' + pl + '" x2="' + (W - pl) + '" y1="' + y(t) + '" y2="' + y(t) + '"/>'; });
+    vals.forEach(function (v, i) {
+      var x = pl + i * step + (step - bw) / 2, last = i === vals.length - 1;
+      h += '<rect x="' + x.toFixed(1) + '" y="' + y(v).toFixed(1) + '" width="' + bw + '" height="' + (H - pb - y(v)).toFixed(1) + '" rx="5" style="fill:' + (last ? 'var(--accent)' : 'var(--belt)') + '"/>' +
+        '<text class="val" x="' + (x + bw / 2).toFixed(1) + '" y="' + (y(v) - 5).toFixed(1) + '" text-anchor="middle">' + v + '</text>' +
+        '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + (last ? 'Hoy' : 'S' + (i - 6)) + '</text>';
+    });
+    h += '<line class="target" x1="' + pl + '" x2="' + (W - pl) + '" y1="' + y(200) + '" y2="' + y(200) + '"/><text x="' + (W - pl) + '" y="' + (y(200) - 4) + '" text-anchor="end">meta 200 g</text>';
+    $('#prodSvg').innerHTML = h;
+
+    var r = 72, cx = 100, cy = 100, arc = Math.PI * r, v = 84, tg = 88;
+    function pt(p) { var a = Math.PI * (1 - p / 100); return [cx + r * Math.cos(a), cy - r * Math.sin(a)]; }
+    var s = pt(0), e = pt(100), tp = pt(tg), tq = [cx + (r - 12) * Math.cos(Math.PI * (1 - tg / 100)), cy - (r - 12) * Math.sin(Math.PI * (1 - tg / 100))];
+    var path = 'M' + s[0] + ' ' + s[1] + ' A' + r + ' ' + r + ' 0 0 1 ' + e[0] + ' ' + e[1];
+    $('#recSvg').innerHTML =
+      '<path d="' + path + '" fill="none" style="stroke:var(--panel-2)" stroke-width="14" stroke-linecap="round"/>' +
+      '<path d="' + path + '" fill="none" style="stroke:var(--c-met)" stroke-width="14" stroke-linecap="round" stroke-dasharray="' + (arc * v / 100).toFixed(1) + ' ' + arc.toFixed(1) + '"/>' +
+      '<line x1="' + tq[0] + '" y1="' + tq[1] + '" x2="' + (tp[0] + (tp[0] - cx) * 0.1) + '" y2="' + (tp[1] + (tp[1] - cy) * 0.1) + '" style="stroke:var(--ink);stroke-width:2.2"/>' +
+      '<text x="100" y="94" text-anchor="middle" style="font-family:var(--disp);font-size:30px;font-weight:800;fill:var(--ink)">84 %</text>' +
+      '<text x="100" y="112" text-anchor="middle">meta 88 %</text>';
+  }
+
+  /* ---------- Cascada del oro ---------- */
+  function buildFall() {
+    var rows = [
+      { l: 'Valor del oro', a: 0, b: 100, v: '$100', c: 'var(--c-sst)' },
+      { l: 'Lo que descuenta el comprador', a: 92, b: 100, v: '−$8', c: 'var(--crit)' },
+      { l: 'Refinación y transporte', a: 89, b: 92, v: '−$3', c: 'var(--crit)' },
+      { l: 'Regalías', a: 85, b: 89, v: '−$4', c: 'var(--crit)' },
+      { l: 'Costos de operación', a: 30, b: 85, v: '−$55', c: 'var(--crit)' },
+      { l: 'Le queda al proyecto', a: 0, b: 30, v: '$30', c: 'var(--ok)', end: true }
+    ];
+    $('#fall').innerHTML = rows.map(function (r) {
+      return '<div class="r' + (r.end ? ' end' : '') + '"><span>' + r.l + '</span><div class="trk"><i class="seg" style="left:' + r.a + '%;width:' + (r.b - r.a) + '%;background:' + r.c + '"></i></div><span class="v">' + r.v + '</span></div>';
+    }).join('');
+  }
+
+  /* ---------- Presupuesto ---------- */
+  function buildBudget() {
+    var r = 46, C = 2 * Math.PI * r, parts = [[46, 'var(--info)'], [22, 'var(--accent)'], [32, 'var(--belt)']], off = 0, h = '';
+    parts.forEach(function (p) {
+      var len = C * p[0] / 100;
+      h += '<circle cx="60" cy="60" r="' + r + '" fill="none" style="stroke:' + p[1] + '" stroke-width="16" stroke-dasharray="' + len.toFixed(1) + ' ' + (C - len).toFixed(1) + '" stroke-dashoffset="' + (-off).toFixed(1) + '" transform="rotate(-90 60 60)"/>';
+      off += len;
+    });
+    h += '<text x="60" y="58" text-anchor="middle" style="font-family:var(--disp);font-size:20px;font-weight:800;fill:var(--ink)">68 %</text><text x="60" y="74" text-anchor="middle" style="font-size:9px;fill:var(--ink-soft)">usado o comprometido</text>';
+    $('#donut').innerHTML = h;
+    var per = [['GEO', 52], ['MIN', 71], ['MET', 64], ['SST', 38], ['AMB', 44], ['EMP', 60], ['JUR', 80], ['SOC', 33]];
+    $('#budgetBars').innerHTML = per.map(function (p) {
+      var st = ST.filter(function (s) { return s.id === p[0]; })[0];
+      return '<div class="b"><span>' + st.n + '</span><div class="trk"><div class="fill" style="width:' + p[1] + '%;background:var(' + st.c + ')"></div></div><span class="p">' + p[1] + '%</span></div>';
+    }).join('');
+  }
+
+  /* ---------- Listas ---------- */
+  function initials(n) { return n.replace(/^(Dra?\.)\s*/, '').split(' ').slice(0, 2).map(function (w) { return w[0]; }).join(''); }
+  function buildLists() {
+    var urgent = [
+      ['JUR', 'Responder el auto de la ANM', 'Elena Mora', 'Hoy', 'crit'],
+      ['JUR', 'Radicar la solicitud de prórroga del subcontrato', 'Elena Mora', '3 días', 'warn'],
+      ['AMB', 'Radicar los anexos de la licencia ambiental', 'Paula Vélez', '5 días', 'warn'],
+      ['MIN', 'Entregar el plan de avance del mes', 'Luis Pardo', '8 días', 'plain'],
+      ['EMP', 'Pagar la póliza de cumplimiento', 'Andrés Cruz', '10 días', 'plain']
+    ];
+    $('#urgent').innerHTML = urgent.map(function (u) {
+      var st = ST.filter(function (s) { return s.id === u[0]; })[0];
+      return '<li class="item"><span class="who" style="background:var(' + st.c + ')">' + initials(u[2]) + '</span><p>' + u[1] + '<small>' + st.n + ' · ' + u[2] + '</small></p><span class="chip ' + u[4] + '">' + u[3] + '</span></li>';
+    }).join('');
+    var tick = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
+    var week = [['Se cerró el estudio del frente 3', 'Geología'], ['Se aceptó el documento del plan de manejo ambiental', 'Ambiental'], ['Se respondió el auto sobre la póliza', 'Jurídico'], ['La brigada terminó su capacitación', 'Seguridad y salud']];
+    $('#week').innerHTML = week.map(function (w) {
+      return '<li class="item"><span class="check">' + tick + '</span><p>' + w[0] + '<small>' + w[1] + '</small></p><span></span></li>';
+    }).join('');
+    var needs = [['Firmar la solicitud de prórroga', 'Jueves'], ['Enviar la copia de la cédula del representante', 'Viernes'], ['Elegir la fecha de la visita de la autoridad', 'Esta semana']];
+    $('#needs').innerHTML = needs.map(function (n) {
+      return '<li class="need"><span class="box"></span><p>' + n[0] + '</p><span class="chip warn">' + n[1] + '</span></li>';
+    }).join('');
+  }
+
+  /* ---------- Plan por mes ---------- */
+  function buildHeat() {
+    var months = ['Oct', 'Nov', 'Dic', 'Ene', 'Feb', 'Mar'];
+    var load = { GEO: [3, 2, 1, 0, 0, 0], MIN: [2, 3, 3, 2, 1, 0], MET: [1, 2, 3, 2, 1, 1], SST: [2, 1, 1, 1, 0, 0], AMB: [3, 3, 2, 1, 0, 0], EMP: [1, 1, 2, 1, 1, 0], JUR: [3, 3, 2, 1, 0, 0], SOC: [1, 2, 2, 1, 1, 1] };
+    var h = '<span></span>' + months.map(function (m) { return '<span class="h">' + m + '</span>'; }).join('');
+    ST.forEach(function (st) {
+      h += '<span class="rowl">' + st.n + '</span>' + load[st.id].map(function (n, i) {
+        return '<i class="cell' + (i === 0 ? ' now' : '') + '" style="background:' + (n ? 'color-mix(in srgb, var(' + st.c + ') ' + (n * 30 + 10) + '%, var(--panel-2))' : 'var(--panel-2)') + '"></i>';
+      }).join('');
+    });
+    $('#heat').innerHTML = h;
+  }
+
+  buildPlant(); buildRoute(); buildProd(); buildFall(); buildBudget(); buildLists(); buildHeat();
+  select('JUR');
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('animateMotion').forEach(function (a) { a.parentNode.removeChild(a); });
+  }
+})();
+</script>
+</body>
+</html>
